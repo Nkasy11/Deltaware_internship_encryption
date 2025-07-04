@@ -1,0 +1,78 @@
+#!/usr/bin/python
+from Crypto.Cipher import AES, DES, Blowfish
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Random import get_random_bytes
+from base64 import b64encode, b64decode
+
+def aes_encrypt_decrypt():
+	key = get_random_bytes(16)
+	data = input("enter data to encrypt (AES): ").encode()
+	cipher = AES.new(key, AES.MODE_EAX)
+	ciphertext, tag = cipher.encrypt_and_digest(data)
+
+	print(f"Ciphertext (Base64): {b64encode(ciphertext).decode()}")
+	cipher_dec = AES.new(key, AES.MODE_EAX, nonce=cipher.nonce)
+	plaintext = cipher_dec.decrypt(ciphertext)
+	print(f"Decrypted: {plaintext.decode()}")
+
+def des_encrypt_decrypt():
+	key = get_random_bytes(8)
+	data = input("enter data to encrypt (DES): ").encode()
+	cipher = DES.new(key, DES.MODE_ECB)
+	padded = data + b' ' * (8 - len(data) % 8)
+	ciphertext = cipher.encrypt(padded)
+
+	print(f"Ciphertext (Base64): {b64encode(ciphertext).decode()}")
+	decrypted = cipher.decrypt(ciphertext).rstrip(b' ')
+	print(f"Decrypted: {decrypted.decode()}")
+
+def blowfish_encrypt_decrypt():
+	key = get_random_bytes(16)
+	data = input("enter data to encrypt(Blowfish): ").encode()
+	cipher = Blowfish.new(key, Blowfish.MODE_ECB)
+	padded = data + b' ' * (8 - len(data) % 8)
+	ciphertext = cipher.encrypt(padded)
+
+	print(f"Ciphertext (Base64): {b64encode(ciphertext).decode()}")
+	decrypted = cipher.decrypt(ciphertext).rstrip(b' ')
+	print(f"Decrypted: {decrypted.decode()}")
+
+def rsa_encrypt_decrypt():
+	key = RSA.generate(2048)
+	public_key = key.publickey()
+	data = input("enter data to encrypt (RSA): ").encode()
+	cipher_enc = PKCS1_OAEP.new(public_key)
+	ciphertext = cipher_enc.encrypt(data)
+
+	print(f"Ciphertext (Base64): {b64encode(ciphertext).decode()}")
+	cipher_dec = PKCS1_OAEP.new(key)
+	plaintext = cipher_dec.decrypt(ciphertext)
+	print(f"Decrypted: {plaintext.decode()}")
+
+def menu():
+	while True:
+		print("\n--- Encryption CLI Tool ---")
+		print("1. AES")
+		print("2. DES")
+		print("3. Blowfish")
+		print("4. RSA")
+		print("5. Exit")
+
+		choice = input("choose an option: ")
+		if choice == '1':
+			aes_encrypt_decrypt()
+		elif choice == '2':
+			des_encrypt_decrypt()
+		elif choice == '3':
+			blowfish_encrypt_decrypt()
+		elif choice == '4':
+			rsa_encrypt_decrypt()
+		elif choice == '5':
+			print("exiting...")
+			break
+		else:
+			print("Invalid choice. Try again.")
+
+if __name__ == "__main__":
+	menu()
